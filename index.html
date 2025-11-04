@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>障碍躲避游戏 - Barrier Dodging Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>障碍躲避游戏</h1>
+        <div class="game-info">
+            <div class="info-item">
+                <span class="label">时间:</span>
+                <span id="time">3:00</span>
+            </div>
+            <div class="info-item">
+                <span class="label">得分:</span>
+                <span id="score">0</span>
+            </div>
+            <div class="info-item">
+                <span class="label">障碍:</span>
+                <span id="obstacles">0/90</span>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn btn-primary">开始游戏</button>
+            <button id="pauseBtn" class="btn btn-secondary" style="display: none;">暂停</button>
+            <button id="restartBtn" class="btn btn-secondary" style="display: none;">重新开始</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>游戏说明:</h3>
+            <ul>
+                <li>点击屏幕或按空格键跳跃</li>
+                <li>躲避新冠病毒障碍</li>
+                <li>游戏时长3分钟，每2秒出现一个障碍</li>
+                <li>得分 = (已躲过障碍数 / 总障碍数) × 100</li>
+                <li>碰到障碍游戏结束</li>
+            </ul>
+        </div>
+        
+        <div id="gameOverModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>游戏结束!</h2>
+                <p id="finalScore"></p>
+                <button id="playAgainBtn" class="btn btn-primary">再玩一次</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
