@@ -19,7 +19,7 @@ let gameState = {
     animationId: null,
     lastObstacleTime: 0,
     startTime: null,
-    nextGreetingAt: getRandomGreetingInterval(5, 15),
+    nextGreetingAt: 10,  // Will be set to random value when game starts
     lastGreetingObstacles: 0
 };
 
@@ -217,9 +217,7 @@ continueBtn.addEventListener('click', () => {
     greetingModal.style.display = 'none';
     if (gameState.running && !gameState.gameOver) {
         gameState.paused = false;
-        // Adjust start time to account for greeting display duration
-        const now = Date.now();
-        gameState.startTime = now - (GAME_DURATION - gameState.timeRemaining) * 1000;
+        adjustStartTimeForPause();
         gameLoop();
     }
 });
@@ -243,6 +241,7 @@ function startGame() {
     gameState.gameOver = false;
     gameState.startTime = Date.now();
     gameState.lastObstacleTime = 0;
+    gameState.nextGreetingAt = getRandomGreetingInterval(5, 15);
     
     startBtn.style.display = 'none';
     pauseBtn.style.display = 'inline-block';
@@ -257,12 +256,16 @@ function togglePause() {
         pauseBtn.textContent = gameState.paused ? '继续' : '暂停';
         
         if (!gameState.paused) {
-            // Adjust start time to account for pause duration
-            const now = Date.now();
-            gameState.startTime = now - (GAME_DURATION - gameState.timeRemaining) * 1000;
+            adjustStartTimeForPause();
             gameLoop();
         }
     }
+}
+
+function adjustStartTimeForPause() {
+    // Adjust start time to account for pause duration
+    const now = Date.now();
+    gameState.startTime = now - (GAME_DURATION - gameState.timeRemaining) * 1000;
 }
 
 function resetGame() {
