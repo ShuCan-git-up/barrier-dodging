@@ -18,7 +18,9 @@ let gameState = {
     gameOver: false,
     animationId: null,
     lastObstacleTime: 0,
-    startTime: null
+    startTime: null,
+    nextGreetingAt: 10,  // Will be set to random value when game starts
+    lastGreetingObstacles: 0
 };
 
 // Player object (Mario-like character)
@@ -198,6 +200,9 @@ const timeDisplay = document.getElementById('time');
 const scoreDisplay = document.getElementById('score');
 const obstaclesDisplay = document.getElementById('obstacles');
 const finalScoreDisplay = document.getElementById('finalScore');
+const greetingModal = document.getElementById('greetingModal');
+const greetingText = document.getElementById('greetingText');
+const continueBtn = document.getElementById('continueBtn');
 
 // Event listeners
 startBtn.addEventListener('click', startGame);
@@ -206,6 +211,15 @@ restartBtn.addEventListener('click', resetGame);
 playAgainBtn.addEventListener('click', () => {
     gameOverModal.style.display = 'none';
     resetGame();
+});
+
+continueBtn.addEventListener('click', () => {
+    greetingModal.style.display = 'none';
+    if (gameState.running && !gameState.gameOver) {
+        gameState.paused = false;
+        adjustStartTimeForPause();
+        gameLoop();
+    }
 });
 
 canvas.addEventListener('click', () => {
@@ -227,6 +241,7 @@ function startGame() {
     gameState.gameOver = false;
     gameState.startTime = Date.now();
     gameState.lastObstacleTime = 0;
+    gameState.nextGreetingAt = getRandomGreetingInterval(5, 15);
     
     startBtn.style.display = 'none';
     pauseBtn.style.display = 'inline-block';
@@ -241,12 +256,16 @@ function togglePause() {
         pauseBtn.textContent = gameState.paused ? '继续' : '暂停';
         
         if (!gameState.paused) {
-            // Adjust start time to account for pause duration
-            const now = Date.now();
-            gameState.startTime = now - (GAME_DURATION - gameState.timeRemaining) * 1000;
+            adjustStartTimeForPause();
             gameLoop();
         }
     }
+}
+
+function adjustStartTimeForPause() {
+    // Adjust start time to account for pause duration
+    const now = Date.now();
+    gameState.startTime = now - (GAME_DURATION - gameState.timeRemaining) * 1000;
 }
 
 function resetGame() {
@@ -265,7 +284,9 @@ function resetGame() {
         gameOver: false,
         animationId: null,
         lastObstacleTime: 0,
-        startTime: null
+        startTime: null,
+        nextGreetingAt: getRandomGreetingInterval(5, 15),
+        lastGreetingObstacles: 0
     };
     
     // Reset player
@@ -319,6 +340,20 @@ function spawnObstacle() {
         obstacles.push(new Obstacle());
         gameState.totalObstaclesSpawned++;
     }
+}
+
+function showGreeting() {
+    // Pause the game
+    gameState.paused = true;
+    
+    // Display greeting modal
+    const greeting = getRandomGreeting();
+    greetingText.textContent = greeting;
+    greetingModal.style.display = 'flex';
+    
+    // Set next greeting interval
+    gameState.nextGreetingAt = gameState.obstaclesPassed + getRandomGreetingInterval(5, 15);
+    gameState.lastGreetingObstacles = gameState.obstaclesPassed;
 }
 
 function drawGround() {
@@ -398,6 +433,12 @@ function gameLoop() {
         if (!obstacle.passed && obstacle.x + obstacle.width < player.x) {
             obstacle.passed = true;
             gameState.obstaclesPassed++;
+            
+            // Check if it's time to show a greeting
+            if (gameState.obstaclesPassed >= gameState.nextGreetingAt) {
+                showGreeting();
+                return; // Pause game loop while greeting is shown
+            }
         }
         
         // Remove off-screen obstacles
